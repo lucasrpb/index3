@@ -90,11 +90,13 @@ class MemoryContext(val DATA_SIZE: Int,
   }
 
   override def split(p: Partition): Partition = {
+
     val src = p.asInstanceOf[DataBlock]
     val right = createPartition().asInstanceOf[DataBlock]
 
     val len = src.length
-    val middle = src.calcMaxLen(src.keys, src.size/2)
+    val middle = if(src.length < 3) 1 else
+      src.calcMaxLen(src.keys, src.size/2)
 
     right.keys = Array.ofDim[Pair](len - middle)
 
@@ -118,7 +120,8 @@ class MemoryContext(val DATA_SIZE: Int,
     val right = createMeta()
 
     val len = src.length
-    val middle = src.calcMaxLen(src.pointers, src.size/2)//src.length
+    val middle = if(src.length < 3) 1 else
+      src.calcMaxLen(src.pointers, src.size/2)//src.length
 
     //val (k, v) = src.pointers(0)
     //println(s"len: ${len} middle ${middle} ${src.size/2} ${k.length + v.length}\n")

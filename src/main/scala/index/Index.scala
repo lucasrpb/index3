@@ -5,15 +5,14 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
-class Index[T: ClassTag](var iref: IndexRef)
+class Index[T: ClassTag](val iref: IndexRef,
+                         val MAX_PAIR_SIZE: Int)
                         (implicit val ord: Ordering[Array[Byte]], val ctx: TxContext, val ec: ExecutionContext){
 
   val id = UUID.randomUUID.toString
 
   var root = iref.root
   var size = iref.size
-
-  //implicit val ctx = new TxContext[T]()
 
   def ref: IndexRef = IndexRef(id, root, size)
 
@@ -104,8 +103,8 @@ class Index[T: ClassTag](var iref: IndexRef)
 
     if(left.isFull()){
 
-      val (k, v) = left.pointers(0)
-      println(s"${k.length + v.length} ${left.size()} ${left.length}\n")
+      //val (k, v) = left.pointers(0)
+      //println(s"${k.length + v.length} ${left.size()} ${left.length}\n")
       //println("debug", left.length, left.size, left.inOrder().map(x => x._1.length + x._2.length).sum)
 
       val right = ctx.split(left)
@@ -175,8 +174,15 @@ class Index[T: ClassTag](var iref: IndexRef)
 
   def insert(data: Seq[Pair]): Future[(Boolean, Int)] = {
 
+    val size = data.length
+
+    for(i<-0 until size){
+      val (k, v) = data(i)
+
+      if(k.length + v.length > MAX_PAIR_SIZE) return Future.successful(false -> 0)
+    }
+
     val sorted = data.sortBy(_._1)
-    val size = sorted.length
     var pos = 0
 
     def insert(): Future[(Boolean, Int)] = {

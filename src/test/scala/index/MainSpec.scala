@@ -34,7 +34,7 @@ class MainSpec extends FlatSpec {
 
       implicit val ctx = new MemoryContext(SIZE, SIZE, FACTOR, FACTOR)
       val old = root.get()
-      val index = new Index[String](old)
+      val index = new Index[String](old, ctx.DATA_LIMIT)
 
       val n = rand.nextInt(1, 100)
 
@@ -92,7 +92,7 @@ class MainSpec extends FlatSpec {
 
   "index data " should "be equal to test data" in {
 
-    val n = 1000
+    val n = 100
 
     for(i<-0 until n){
       test()

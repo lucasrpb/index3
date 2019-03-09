@@ -4,7 +4,7 @@
 		module="index3-build"
 		revision="0.1.0-SNAPSHOT"
 		status="integration"
-		publication="20190228221432"
+		publication="20190309124210"
 		e:sbtVersion="1.0" e:scalaVersion="2.12"
 	>
 		<description>
