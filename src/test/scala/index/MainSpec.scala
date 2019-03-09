@@ -24,7 +24,7 @@ class MainSpec extends FlatSpec {
 
     val rand = ThreadLocalRandom.current()
 
-    val SIZE = 100//rand.nextInt(100, 2048)
+    val SIZE = 1024//rand.nextInt(100, 2048)
     val FACTOR = 80
 
     implicit val store = new MemoryStorage()
@@ -34,7 +34,7 @@ class MainSpec extends FlatSpec {
 
       implicit val ctx = new MemoryContext(SIZE, SIZE, FACTOR, FACTOR)
       val old = root.get()
-      val index = new Index[String](old, ctx.DATA_LIMIT)
+      val index = new Index[String](old, ctx.DATA_MIN)
 
       val n = rand.nextInt(1, 100)
 
@@ -92,7 +92,7 @@ class MainSpec extends FlatSpec {
 
   "index data " should "be equal to test data" in {
 
-    val n = 100
+    val n = 1
 
     for(i<-0 until n){
       test()
