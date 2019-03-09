@@ -10,8 +10,10 @@ class DataBlock(override val id: String,
                 val LIMIT: Int)(implicit ord: Ordering[Array[Byte]]) extends Partition {
 
   var length = 0
-  var size = 0
+  //var size = 0
   var keys = Array.empty[Pair]
+
+  def size() = if(length == 0) 0 else keys.slice(0, length).map(x => x._1.length + x._2.length).sum
 
   def find(k: Array[Byte], start: Int, end: Int): (Boolean, Int) = {
     if(start > end) return false -> start
@@ -31,7 +33,7 @@ class DataBlock(override val id: String,
     }
 
     keys(idx) = k -> v
-    size += (k.length + v.length)
+    //size += (k.length + v.length)
 
     length += 1
 
@@ -96,7 +98,7 @@ class DataBlock(override val id: String,
     val data = keys(idx)
 
     length -= 1
-    size -= (data._1.length + data._2.length)
+    //size -= (data._1.length + data._2.length)
 
     for(i<-idx until length){
       keys(i) = keys(i + 1)
@@ -161,8 +163,8 @@ class DataBlock(override val id: String,
       val (_, vOld) = keys(idx)
       keys(idx) = k -> v
 
-      size -= vOld.length
-      size += v.length
+      //size -= vOld.length
+      //size += v.length
     }
 
     true -> len

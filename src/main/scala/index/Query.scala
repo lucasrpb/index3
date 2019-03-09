@@ -14,7 +14,7 @@ object Query {
           case Some(start) => start match {
             case leaf: Partition => leaf.inOrder()
             case meta: MetaBlock =>
-              meta.pointers.slice(0, meta.size).foldLeft(Seq.empty[Pair]) { case (b, (_, n)) =>
+              meta.pointers.slice(0, meta.length).foldLeft(Seq.empty[Pair]) { case (b, (_, n)) =>
                 b ++ inOrder(Some(n))
               }
           }

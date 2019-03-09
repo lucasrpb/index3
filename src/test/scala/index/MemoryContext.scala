@@ -57,7 +57,7 @@ class MemoryContext(val DATA_SIZE: Int,
     val copy = createPartition().asInstanceOf[DataBlock]
 
     copy.length = src.length
-    copy.size = src.size
+    //copy.size = src.size
 
     copy.keys = Array.ofDim[Pair](src.length)
 
@@ -75,7 +75,7 @@ class MemoryContext(val DATA_SIZE: Int,
 
     val copy = createMeta()
 
-    copy.size = src.size
+    //copy.size = src.size
     copy.length = src.length
     copy.pointers = Array.ofDim[Pointer](src.length)
 
@@ -94,7 +94,7 @@ class MemoryContext(val DATA_SIZE: Int,
     val right = createPartition().asInstanceOf[DataBlock]
 
     val len = src.length
-    val middle = src.calcMaxLen(src.keys, src.size/2)//src.length
+    val middle = src.calcMaxLen(src.keys, src.size/2)
 
     right.keys = Array.ofDim[Pair](len - middle)
 
@@ -104,8 +104,8 @@ class MemoryContext(val DATA_SIZE: Int,
 
       right.keys(i - middle) = src.keys(i)
 
-      right.size += (k.length + v.length)
-      src.size -= (k.length + v.length)
+      //right.size += (k.length + v.length)
+      //src.size -= (k.length + v.length)
 
       right.length += 1
       src.length -= 1
@@ -120,18 +120,24 @@ class MemoryContext(val DATA_SIZE: Int,
     val len = src.length
     val middle = src.calcMaxLen(src.pointers, src.size/2)//src.length
 
+    //val (k, v) = src.pointers(0)
+    //println(s"len: ${len} middle ${middle} ${src.size/2} ${k.length + v.length}\n")
+
     right.pointers = Array.ofDim[Pointer](len - middle)
 
     for(i<-middle until len){
+
       val (k, child) = src.pointers(i)
       right.setChild(k, child, i - middle)(this)
 
-      right.size += k.length + child.length
-      src.size -= (k.length + child.length)
+      //right.size += k.length + child.length
+      //src.size -= (k.length + child.length)
 
       right.length += 1
       src.length -= 1
     }
+
+    //println(s"left size ${src.size()} left len ${src.length} right size ${right.size()} ${right.length}")
 
     right
   }

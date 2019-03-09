@@ -21,7 +21,7 @@ class Index[T: ClassTag](var iref: IndexRef)
     p match {
       case p: MetaBlock =>
 
-        if(p.size == 1){
+        if(p.length == 1){
           root = Some(p.pointers(0)._2)
           true
         } else {
@@ -101,8 +101,16 @@ class Index[T: ClassTag](var iref: IndexRef)
   }
 
   def insertParent(left: MetaBlock, prev: Block[String, Array[Byte], Array[Byte]]): Future[Boolean] = {
+
     if(left.isFull()){
+
+      val (k, v) = left.pointers(0)
+      println(s"${k.length + v.length} ${left.size()} ${left.length}\n")
+      //println("debug", left.length, left.size, left.inOrder().map(x => x._1.length + x._2.length).sum)
+
       val right = ctx.split(left)
+
+      //println("debug", left.length, left.size, left.inOrder().map(x => x._1.length + x._2.length).sum)
 
       if(ord.gt(prev.max.get, left.max.get)){
         right.insert(Seq(prev.max.get -> prev.id))

@@ -24,7 +24,7 @@ class MainSpec extends FlatSpec {
 
     val rand = ThreadLocalRandom.current()
 
-    val SIZE = 1000//rand.nextInt(100, 2048)
+    val SIZE = 100//rand.nextInt(100, 2048)
     val FACTOR = 80
 
     implicit val store = new MemoryStorage()
@@ -43,9 +43,9 @@ class MainSpec extends FlatSpec {
       for(i<-0 until n){
         val k = rand.nextInt(1, MAX_VALUE).toString.getBytes()
 
-        // if(!list.exists(_._1 == k)){
-              list = list :+ k -> k
-        // }
+         if(!list.exists{case (k1, _) => ord.equiv(k, k1)}){
+           list = list :+ k -> k
+         }
       }
 
       index.insert(list).flatMap { case (ok, _) =>

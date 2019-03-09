@@ -1,3 +1,15 @@
 [0m[[0m[0minfo[0m] [0m[0m[32mMainSpec:[0m[0m
 [0m[[0m[0minfo[0m] [0m[0m[32mindex data[0m[0m
-[0m[[0m[0minfo[0m] [0m[0m[32m- should be equal to test data[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m- should be equal to test data *** FAILED ***[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  java.util.NoSuchElementException: None.get[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at scala.None$.get(Option.scala:366)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at scala.None$.get(Option.scala:364)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at index.Index.insertParent(Index.scala:115)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at index.Index.$anonfun$handleParent$1(Index.scala:155)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at scala.concurrent.Future.$anonfun$flatMap$1(Future.scala:307)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at scala.concurrent.impl.Promise.$anonfun$transformWith$1(Promise.scala:41)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at scala.concurrent.impl.CallbackRunnable.run(Promise.scala:64)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at java.base/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1426)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:290)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1020)[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[31m  ...[0m[0m

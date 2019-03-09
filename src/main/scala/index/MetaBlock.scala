@@ -11,8 +11,10 @@ class MetaBlock(val id: String,
   extends Block[String, Array[Byte], Array[Byte]]{
 
   var length = 0
-  var size = 0
+  //var size = 0
   var pointers = Array.empty[Pointer]
+
+  def size() = if(length == 0) 0 else pointers.slice(0, length).map(x => x._1.length + x._2.length).sum
 
   def find(k: Array[Byte], start: Int, end: Int): (Boolean, Int) = {
     if(start > end) return false -> start
@@ -27,7 +29,7 @@ class MetaBlock(val id: String,
   }
 
   def findPath(k: Array[Byte]): Option[String] = {
-    if(isEmpty()) return None
+    if(length == 0) return None
     val (_, pos) = find(k, 0, length - 1)
 
     Some(pointers(if(pos < length) pos else pos - 1)._2)
@@ -62,7 +64,7 @@ class MetaBlock(val id: String,
     setChild(k, child, idx)
 
     length += 1
-    size += (k.length + child.length)
+    //size += (k.length + child.length)
 
     true -> idx
   }
@@ -87,7 +89,7 @@ class MetaBlock(val id: String,
       val (k, c) = data(i)
       bytes += k.length + c.length
 
-      if(bytes >= max) return i
+      if(bytes > max) return i
 
       i += 1
     }
@@ -123,7 +125,7 @@ class MetaBlock(val id: String,
     val data = pointers(idx)
 
     length -= 1
-    size -= (data._1.length + data._2.length)
+    //size -= (data._1.length + data._2.length)
 
     for(i<-idx until length){
       val (k, child) = pointers(i + 1)
