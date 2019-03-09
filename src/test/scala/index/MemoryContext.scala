@@ -4,22 +4,17 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class MemoryContext(val DATA_SIZE: Int,
-                    val META_SIZE: Int,
-                    val DATA_FILL_FACTOR: Int,
-                    val META_FILL_FACTOR: Int)(implicit val ec: ExecutionContext,
+                    val META_SIZE: Int)(implicit val ec: ExecutionContext,
                                                val store: Storage,
                                                val ord: Ordering[Array[Byte]]) extends TxContext {
 
-  val MIN_DATA_FACTOR = 100 - DATA_FILL_FACTOR
-  val MIN_META_FACTOR = 100 - META_FILL_FACTOR
-
   val DATA_MAX = DATA_SIZE
-  val DATA_MIN = (DATA_MAX * MIN_DATA_FACTOR)/100
-  val DATA_LIMIT = (DATA_MAX * 80)/100
+  val DATA_MIN = DATA_MAX/3
+  val DATA_LIMIT = 2 * DATA_MIN
 
   val META_MAX = META_SIZE
-  val META_MIN = (META_MAX * MIN_META_FACTOR)/100
-  val META_LIMIT = (META_MAX * 80)/100
+  val META_MIN = META_MAX/3
+  val META_LIMIT = 2 * META_MIN
 
   println(s"DATA_MIN ${DATA_MIN}, DATA_MAX ${DATA_MAX} DATA_LIMIT ${DATA_LIMIT}\n")
 

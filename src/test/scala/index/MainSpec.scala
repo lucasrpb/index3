@@ -24,15 +24,14 @@ class MainSpec extends FlatSpec {
 
     val rand = ThreadLocalRandom.current()
 
-    val SIZE = 1024//rand.nextInt(100, 2048)
-    val FACTOR = 80
+    val SIZE = 2048//rand.nextInt(100, 2048)
 
     implicit val store = new MemoryStorage()
     val root = new AtomicReference[IndexRef](IndexRef(UUID.randomUUID.toString))
 
     def insert(): Future[(Int, Boolean, Seq[Pair])] = {
 
-      implicit val ctx = new MemoryContext(SIZE, SIZE, FACTOR, FACTOR)
+      implicit val ctx = new MemoryContext(SIZE, SIZE)
       val old = root.get()
       val index = new Index[String](old, ctx.DATA_MIN)
 
@@ -92,7 +91,7 @@ class MainSpec extends FlatSpec {
 
   "index data " should "be equal to test data" in {
 
-    val n = 1
+    val n = 1000
 
     for(i<-0 until n){
       test()

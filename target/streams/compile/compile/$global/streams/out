@@ -1,4 +1,2 @@
-[0m[[0m[31merror[0m] [0m[0mD:\Users\resta\IdeaProjects\index3\src\main\scala\index\Index.scala:213:67: ')' expected but '}' found.[0m
-[0m[[0m[31merror[0m] [0m[0m          println(s"inserted list ${list.map(k => new String(k._1)}\n")[0m
-[0m[[0m[31merror[0m] [0m[0m                                                                  ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[33mwarn[0m] [0m[0mthere was one feature warning; re-run with -feature for details[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
