@@ -4,10 +4,10 @@ import java.util.UUID
 
 import scala.reflect.ClassTag
 
-class DataBlock[T: ClassTag](val id: T,
-                             val MIN: Int,
-                             val MAX: Int,
-                             val LIMIT: Int)(implicit ord: Ordering[Array[Byte]]) extends Partition[T]{
+class DataBlock(override val id: String,
+                val MIN: Int,
+                val MAX: Int,
+                val LIMIT: Int)(implicit ord: Ordering[Array[Byte]]) extends Partition {
 
   var length = 0
   var size = 0
@@ -168,30 +168,7 @@ class DataBlock[T: ClassTag](val id: T,
     true -> len
   }
 
-  def split(): DataBlock[T] = {
-    /*val right = new DataBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
-
-    val len = calcMaxLen(keys, size/2)
-    right.keys = Array.ofDim[Pair](length - len)
-
-    val middle = len
-
-    for(i<-middle until length){
-
-      val data = keys(i)
-      val bytes = data._1.length + data._2.length
-
-      right.keys(i - middle) = data
-
-      right.length += 1
-      length -= 1
-
-      right.size += bytes
-      size -= bytes
-    }
-
-    right*/
-
+  /*def split(): DataBlock[T] = {
     val right = new DataBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
 
     val len = length
@@ -213,9 +190,9 @@ class DataBlock[T: ClassTag](val id: T,
     }
 
     right
-  }
+  }*/
 
-  def merge(right: DataBlock[T]): DataBlock[T] = {
+  /*def merge(right: DataBlock[T]): DataBlock[T] = {
     var j = length
 
     for(i<-0 until right.length){
@@ -232,9 +209,9 @@ class DataBlock[T: ClassTag](val id: T,
     }
 
     this
-  }
+  }*/
 
-  def copy(): DataBlock[T] = {
+  /*def copy(): DataBlock[T] = {
     val copy = new DataBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
 
     copy.length = length
@@ -247,7 +224,7 @@ class DataBlock[T: ClassTag](val id: T,
     }
 
     copy
-  }
+  }*/
 
   override def max: Option[Array[Byte]] = {
     if(isEmpty()) return None

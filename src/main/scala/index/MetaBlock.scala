@@ -4,15 +4,15 @@ import java.util.UUID
 
 import scala.reflect.ClassTag
 
-class MetaBlock[T: ClassTag](val id: T,
-                             val MIN: Int,
-                             val MAX: Int,
-                             val LIMIT: Int)(implicit ord: Ordering[Array[Byte]])
-  extends Block[T, Array[Byte], Array[Byte]]{
+class MetaBlock(val id: String,
+                val MIN: Int,
+                val MAX: Int,
+                val LIMIT: Int)(implicit ord: Ordering[Array[Byte]])
+  extends Block[String, Array[Byte], Array[Byte]]{
 
   var length = 0
   var size = 0
-  var pointers = Array.empty[Pointer[T]]
+  var pointers = Array.empty[Pointer]
 
   def find(k: Array[Byte], start: Int, end: Int): (Boolean, Int) = {
     if(start > end) return false -> start
@@ -26,36 +26,34 @@ class MetaBlock[T: ClassTag](val id: T,
     find(k, pos + 1, end)
   }
 
-  def findPath(k: Array[Byte]): Option[Block[T, Array[Byte], Array[Byte]]] = {
+  def findPath(k: Array[Byte]): Option[String] = {
     if(isEmpty()) return None
     val (_, pos) = find(k, 0, length - 1)
 
     Some(pointers(if(pos < length) pos else pos - 1)._2)
   }
 
-  def setChild(k: Array[Byte], child: Block[T, Array[Byte], Array[Byte]], pos: Int)
-              (implicit ctx: TxContext[T]): Boolean = {
+  def setChild(k: Array[Byte], child: String, pos: Int)(implicit ctx: TxContext): Boolean = {
     pointers(pos) = k -> child
 
-    ctx.parents += child -> (Some(this), pos)
+    ctx.parents += child -> (Some(this.id), pos)
 
     true
   }
 
-  def left[S <: Block[T, Array[Byte], Array[Byte]]](pos: Int): Option[S] = {
+  def left(pos: Int): Option[String] = {
     val lpos = pos - 1
     if(lpos < 0) return None
-    Some(pointers(lpos)._2.asInstanceOf[S])
+    Some(pointers(lpos)._2)
   }
 
-  def right[S <: Block[T, Array[Byte], Array[Byte]]](pos: Int): Option[S] = {
+  def right(pos: Int): Option[String] = {
     val rpos = pos + 1
     if(rpos >= length) return None
-    Some(pointers(rpos)._2.asInstanceOf[S])
+    Some(pointers(rpos)._2)
   }
 
-  def insertAt(k: Array[Byte], child: Block[T, Array[Byte], Array[Byte]], idx: Int)
-              (implicit ctx: TxContext[T]): (Boolean, Int) = {
+  def insertAt(k: Array[Byte], child: String, idx: Int)(implicit ctx: TxContext): (Boolean, Int) = {
     for(i<-length until idx by -1){
       val (k, child) = pointers(i - 1)
       setChild(k, child, i)
@@ -64,14 +62,13 @@ class MetaBlock[T: ClassTag](val id: T,
     setChild(k, child, idx)
 
     length += 1
-    size += (k.length + BLOCK_ADDRESS_SIZE)
+    size += (k.length + child.length)
 
     true -> idx
   }
 
-  def insert(k: Array[Byte], child: Block[T, Array[Byte], Array[Byte]])
-            (implicit ctx: TxContext[T]): (Boolean, Int) = {
-    if(size + (k.length + BLOCK_ADDRESS_SIZE) > MAX) {
+  def insert(k: Array[Byte], child: String)(implicit ctx: TxContext): (Boolean, Int) = {
+    if(size + (k.length + child.length) > MAX) {
       return false -> 0
     }
 
@@ -82,13 +79,13 @@ class MetaBlock[T: ClassTag](val id: T,
     insertAt(k, child, idx)
   }
 
-  def calcMaxLen(data: Seq[Pointer[T]], max: Int): Int = {
+  def calcMaxLen(data: Seq[Pointer], max: Int): Int = {
     var i = 0
     var bytes = 0
 
     while(i < data.length){
       val (k, c) = data(i)
-      bytes += k.length + BLOCK_ADDRESS_SIZE
+      bytes += k.length + c.length
 
       if(bytes >= max) return i
 
@@ -98,7 +95,7 @@ class MetaBlock[T: ClassTag](val id: T,
     data.length
   }
 
-  def insert(data: Seq[Pointer[T]])(implicit ctx: TxContext[T]): (Boolean, Int) = {
+  def insert(data: Seq[Pointer])(implicit ctx: TxContext): (Boolean, Int) = {
 
     val len = calcMaxLen(data, MAX - size)
 
@@ -110,7 +107,7 @@ class MetaBlock[T: ClassTag](val id: T,
       }
     }
 
-    pointers = pointers ++ Array.ofDim[Pointer[T]](len)
+    pointers = pointers ++ Array.ofDim[Pointer](len)
 
     for(i<-0 until len){
       val (k, c) = data(i)
@@ -122,11 +119,11 @@ class MetaBlock[T: ClassTag](val id: T,
     true -> len
   }
 
-  def removeAt(idx: Int)(implicit ctx: TxContext[T]): Pointer[T] = {
+  def removeAt(idx: Int)(implicit ctx: TxContext): Pointer = {
     val data = pointers(idx)
 
     length -= 1
-    size -= (data._1.length + BLOCK_ADDRESS_SIZE)
+    size -= (data._1.length + data._2.length)
 
     for(i<-idx until length){
       val (k, child) = pointers(i + 1)
@@ -136,7 +133,7 @@ class MetaBlock[T: ClassTag](val id: T,
     data
   }
 
-  def remove(k: Array[Byte])(implicit ctx: TxContext[T]): Boolean = {
+  def remove(k: Array[Byte])(implicit ctx: TxContext): Boolean = {
     if(isEmpty()) return false
 
     val (found, idx) = find(k, 0, length - 1)
@@ -148,7 +145,7 @@ class MetaBlock[T: ClassTag](val id: T,
     true
   }
 
-  def remove(keys: Seq[Array[Byte]])(implicit ctx: TxContext[T]): (Boolean, Int) = {
+  def remove(keys: Seq[Array[Byte]])(implicit ctx: TxContext): (Boolean, Int) = {
     if(isEmpty()) return false -> 0
 
     val len = keys.length
@@ -160,7 +157,7 @@ class MetaBlock[T: ClassTag](val id: T,
     true -> len
   }
 
-  def update(data: Seq[Pointer[T]])(implicit ctx: TxContext[T]): (Boolean, Int) = {
+  def update(data: Seq[Pointer])(implicit ctx: TxContext): (Boolean, Int) = {
 
     val len = data.length
 
@@ -177,7 +174,7 @@ class MetaBlock[T: ClassTag](val id: T,
     true -> len
   }
 
-  def split()(implicit ctx: TxContext[T]): MetaBlock[T] = {
+  /*def split()(implicit ctx: TxContext[T]): MetaBlock[T] = {
     val right = new MetaBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
 
     val len = length
@@ -197,9 +194,9 @@ class MetaBlock[T: ClassTag](val id: T,
     }
 
     right
-  }
+  }*/
 
-  def copy()(implicit ctx: TxContext[T]): MetaBlock[T] = {
+  /*def copy()(implicit ctx: TxContext[T]): MetaBlock[T] = {
 
     if(ctx.blocks.isDefinedAt(this)) return this
 
@@ -210,7 +207,7 @@ class MetaBlock[T: ClassTag](val id: T,
     copy.pointers = Array.ofDim[Pointer[T]](length)
 
     ctx.blocks += copy -> true
-    ctx.parents += copy -> ctx.parents(this)
+    ctx.parents += copy -> ctx.parents(this.id)
 
     for(i<-0 until length){
       val (k, child) = pointers(i)
@@ -218,7 +215,7 @@ class MetaBlock[T: ClassTag](val id: T,
     }
 
     return this
-  }
+  }*/
 
   def max: Option[Array[Byte]] = {
     if(isEmpty()) return None
@@ -230,8 +227,8 @@ class MetaBlock[T: ClassTag](val id: T,
   def hasMinimumSize(): Boolean = size >= MIN
   def hasEnoughSize(): Boolean = size > MIN
 
-  def inOrder(): Seq[Pointer[T]] = {
-    if(isEmpty()) return Seq.empty[Pointer[T]]
+  def inOrder(): Seq[Pointer] = {
+    if(isEmpty()) return Seq.empty[Pointer]
     pointers.slice(0, length)
   }
 

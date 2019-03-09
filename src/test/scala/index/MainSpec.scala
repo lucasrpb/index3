@@ -24,37 +24,68 @@ class MainSpec extends FlatSpec {
 
     val rand = ThreadLocalRandom.current()
 
-    val SIZE = 1024
+    val SIZE = 1000//rand.nextInt(100, 2048)
     val FACTOR = 80
 
-    val ref = new AtomicReference(new IndexRef[String](UUID.randomUUID.toString))
-    val old = ref.get()
-    val index = new Index[String](old, SIZE, SIZE, FACTOR, FACTOR)
+    implicit val store = new MemoryStorage()
+    val root = new AtomicReference[IndexRef](IndexRef(UUID.randomUUID.toString))
 
-    val words = scala.util.Random.shuffle(Words.words)
-    val len = 300//Words.words.length
-    val n = len
+    def insert(): Future[(Int, Boolean, Seq[Pair])] = {
 
-    var list = Seq.empty[Pair]
+      implicit val ctx = new MemoryContext(SIZE, SIZE, FACTOR, FACTOR)
+      val old = root.get()
+      val index = new Index[String](old)
 
-    for(i<-0 until n){
-      //val k = Words.words(i).getBytes()
-      val k = rand.nextInt(1, MAX_VALUE).toString.getBytes()
+      val n = rand.nextInt(1, 100)
 
-      if(!list.exists(_._1.equals(k))){
-        list = list :+ k -> k
+      var list = Seq.empty[Pair]
+
+      for(i<-0 until n){
+        val k = rand.nextInt(1, MAX_VALUE).toString.getBytes()
+
+        // if(!list.exists(_._1 == k)){
+              list = list :+ k -> k
+        // }
+      }
+
+      index.insert(list).flatMap { case (ok, _) =>
+
+        if(!ok){
+          Future.successful(Tuple3(1, false, null))
+        } else {
+
+          //We must save first before updating the ref...
+          store.save(ctx.blocks).map { ok =>
+            Tuple3(1, (ok && root.compareAndSet(old, index.ref)), list)
+          }
+        }
       }
     }
 
-    if(index.insert(list)._1){
-      ref.compareAndSet(old, index.ref)
+    val n = rand.nextInt(4, 10)
+
+    var tasks = Seq.empty[Future[(Int, Boolean, Seq[Pair])]]
+
+    for(i<-0 until n){
+      tasks = tasks :+ insert()
     }
 
-    val dsorted = list.sortBy(_._1).map{case (k, v) => new String(k)}
-    val isorted = Query.inOrder(index.ref.root).map{case (k, _) => new String(k)}
+    val result = Await.result(Future.sequence(tasks), 1 minute)
+    val results_ok = result.filter(_._2)
 
-    println(s"dsorted: $dsorted\n")
-    println(s"isorted: $isorted\n")
+    var data = Seq.empty[Pair]
+
+    results_ok.foreach { case (op, _, list) =>
+      data = data ++ list
+    }
+
+    val dsorted = data.sorted.map{case (k, _) => new String(k)}
+    val ref = root.get()
+    val isorted = Query.inOrder(ref.root).map{case (k, _) => new String(k)}
+
+    println(s"dsorted: ${dsorted}\n")
+    println(s"isroted: ${isorted}\n")
+    println(s"n: ${result.length} succeed: ${results_ok.length} size: ${ref.size}\n")
 
     assert(dsorted.equals(isorted))
   }
