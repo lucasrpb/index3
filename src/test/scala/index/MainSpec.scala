@@ -45,7 +45,7 @@ class MainSpec extends FlatSpec {
         list = list :+ k -> k
       }
     }
-    
+
     if(index.insert(list)._1){
       ref.compareAndSet(old, index.ref)
     }
