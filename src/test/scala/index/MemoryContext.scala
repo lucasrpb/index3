@@ -93,8 +93,8 @@ class MemoryContext(val DATA_SIZE: Int,
     val src = p.asInstanceOf[DataBlock]
     val right = createPartition().asInstanceOf[DataBlock]
 
-    val len = src.calcMaxLen(src.keys, src.size/2)//src.length
-    val middle = len/2
+    val len = src.length
+    val middle = src.calcMaxLen(src.keys, src.size/2)//src.length
 
     right.keys = Array.ofDim[Pair](len - middle)
 
@@ -117,8 +117,8 @@ class MemoryContext(val DATA_SIZE: Int,
   override def split(src: MetaBlock): MetaBlock = {
     val right = createMeta()
 
-    val len = src.calcMaxLen(src.pointers, src.size/2)//src.length
-    val middle = len/2
+    val len = src.length
+    val middle = src.calcMaxLen(src.pointers, src.size/2)//src.length
 
     right.pointers = Array.ofDim[Pointer](len - middle)
 
