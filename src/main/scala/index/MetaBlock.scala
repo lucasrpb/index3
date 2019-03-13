@@ -11,10 +11,10 @@ class MetaBlock(val id: String,
   extends Block[String, Array[Byte], Array[Byte]]{
 
   var length = 0
-  //var size = 0
+  var size = 0
   var pointers = Array.empty[Pointer]
 
-  def size() = if(length == 0) 0 else pointers.slice(0, length).map(x => x._1.length + x._2.length).sum
+  //def size() = if(length == 0) 0 else pointers.slice(0, length).map(x => x._1.length + x._2.length).sum
 
   def find(k: Array[Byte], start: Int, end: Int): (Boolean, Int) = {
     if(start > end) return false -> start
@@ -64,7 +64,7 @@ class MetaBlock(val id: String,
     setChild(k, child, idx)
 
     length += 1
-    //size += (k.length + child.length)
+    size += (k.length + child.length)
 
     true -> idx
   }
@@ -125,7 +125,7 @@ class MetaBlock(val id: String,
     val data = pointers(idx)
 
     length -= 1
-    //size -= (data._1.length + data._2.length)
+    size -= (data._1.length + data._2.length)
 
     for(i<-idx until length){
       val (k, child) = pointers(i + 1)
@@ -164,60 +164,22 @@ class MetaBlock(val id: String,
     val len = data.length
 
     for(i<-0 until len){
+
+      val (_, cOld) = pointers(i)
       val (k, child) = data(i)
 
       val (found, idx) = find(k, 0, length - 1)
 
       if(!found) return false -> 0
 
+      size -= cOld.length
+      size += child.length
+
       setChild(k, child, idx)
     }
 
     true -> len
   }
-
-  /*def split()(implicit ctx: TxContext[T]): MetaBlock[T] = {
-    val right = new MetaBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
-
-    val len = length
-    val middle = len/2
-
-    right.pointers = Array.ofDim[Pointer[T]](len - middle)
-
-    for(i<-middle until len){
-      val (k, child) = pointers(i)
-      right.setChild(k, child, i - middle)
-
-      right.size += k.length + BLOCK_ADDRESS_SIZE
-      size -= (k.length + BLOCK_ADDRESS_SIZE)
-
-      right.length += 1
-      length -= 1
-    }
-
-    right
-  }*/
-
-  /*def copy()(implicit ctx: TxContext[T]): MetaBlock[T] = {
-
-    if(ctx.blocks.isDefinedAt(this)) return this
-
-    val copy = new MetaBlock[T](UUID.randomUUID.toString.asInstanceOf[T], MIN, MAX, LIMIT)
-
-    copy.size = size
-    copy.length = length
-    copy.pointers = Array.ofDim[Pointer[T]](length)
-
-    ctx.blocks += copy -> true
-    ctx.parents += copy -> ctx.parents(this.id)
-
-    for(i<-0 until length){
-      val (k, child) = pointers(i)
-      copy.setChild(k, child, i)
-    }
-
-    return this
-  }*/
 
   def max: Option[Array[Byte]] = {
     if(isEmpty()) return None

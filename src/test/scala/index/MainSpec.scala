@@ -42,9 +42,9 @@ class MainSpec extends FlatSpec {
       for(i<-0 until n){
         val k = rand.nextInt(1, MAX_VALUE).toString.getBytes()
 
-         if(!list.exists{case (k1, _) => ord.equiv(k, k1)}){
+         //if(!list.exists{case (k1, _) => ord.equiv(k, k1)}){
            list = list :+ k -> k
-         }
+         //}
       }
 
       index.insert(list).flatMap { case (ok, _) =>
@@ -91,7 +91,7 @@ class MainSpec extends FlatSpec {
 
   "index data " should "be equal to test data" in {
 
-    val n = 1000
+    val n = 100
 
     for(i<-0 until n){
       test()

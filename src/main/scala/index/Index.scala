@@ -190,8 +190,6 @@ class Index[T: ClassTag](val iref: IndexRef,
     def insert(): Future[(Boolean, Int)] = {
       if(pos == size) return Future.successful(true -> 0)
 
-      println(s"pos ${pos} size ${size}\n")
-
       var list = sorted.slice(pos, size)
       val (k, _) = list(0)
 
@@ -211,9 +209,6 @@ class Index[T: ClassTag](val iref: IndexRef,
         if(!ok) {
           Future.successful(false -> 0)
         } else {
-
-          println(s"inserted: ${n}")
-
           pos += n
           insert()
         }
