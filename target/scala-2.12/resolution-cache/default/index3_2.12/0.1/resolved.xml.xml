@@ -4,7 +4,7 @@
 		module="index3_2.12"
 		revision="0.1"
 		status="integration"
-		publication="20190309182447"
+		publication="20190313221153"
 	>
 		<description>
 		index3
@@ -35,5 +35,6 @@
 		<dependency org="org.scalactic" name="scalactic_2.12" rev="3.0.5" conf="compile->default(compile)"/>
 		<dependency org="org.scalatest" name="scalatest_2.12" rev="3.0.5" conf="test->default(compile)"/>
 		<dependency org="com.google.guava" name="guava" rev="27.0.1-jre" conf="compile->default(compile)"/>
+		<dependency org="com.datastax.cassandra" name="cassandra-driver-core" rev="3.7.0" conf="compile->default(compile)"/>
 	</dependencies>
 </ivy-module>

@@ -5,8 +5,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MemoryContext(val DATA_SIZE: Int,
                     val META_SIZE: Int)(implicit val ec: ExecutionContext,
-                                               val store: Storage,
-                                               val ord: Ordering[Array[Byte]]) extends TxContext {
+                                        val store: Storage,
+                                        val ord: Ordering[Array[Byte]]) extends TxContext {
 
   val DATA_MAX = DATA_SIZE
   val DATA_MIN = DATA_MAX/3
@@ -19,29 +19,29 @@ class MemoryContext(val DATA_SIZE: Int,
   println(s"DATA_MIN ${DATA_MIN}, DATA_MAX ${DATA_MAX} DATA_LIMIT ${DATA_LIMIT}\n")
 
   override def createPartition(): Partition = {
-    val p = new DataBlock(UUID.randomUUID.toString, DATA_MIN, DATA_MAX, DATA_LIMIT)
+    val p = new DataBlock(UUID.randomUUID.toString.getBytes(), DATA_MIN, DATA_MAX, DATA_LIMIT)
     blocks.put(p.id, p)
     p
   }
 
   override def createMeta(): MetaBlock = {
-    val m = new MetaBlock(UUID.randomUUID.toString, META_MIN, META_MAX, META_LIMIT)
+    val m = new MetaBlock(UUID.randomUUID.toString.getBytes(), META_MIN, META_MAX, META_LIMIT)
     blocks.put(m.id, m)
     m
   }
 
-  override def getBlock(id: String): Future[Option[Block[String, Array[Byte], Array[Byte]]]] = {
+  override def getBlock(id: Array[Byte]): Future[Option[Block]] = {
     blocks.get(id) match {
       case None => store.get(id)
       case Some(b) => Future.successful(Some(b))
     }
   }
 
-  override def getPartition(id: String): Future[Option[Partition]] = {
+  override def getPartition(id: Array[Byte]): Future[Option[Partition]] = {
     getBlock(id).map(_.map(_.asInstanceOf[Partition]))
   }
 
-  override def getMeta(id: String): Future[Option[MetaBlock]] = {
+  override def getMeta(id: Array[Byte]): Future[Option[MetaBlock]] = {
     getBlock(id).map(_.map(_.asInstanceOf[MetaBlock]))
   }
 

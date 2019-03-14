@@ -6,14 +6,14 @@ import scala.concurrent.Future
 trait TxContext {
 
   val parents: Parents = new Parents()
-  val blocks = new TrieMap[String, Block[String, Array[Byte], Array[Byte]]]()
+  val blocks = new TrieMap[Array[Byte], Block]()
 
   def createPartition(): Partition
   def createMeta(): MetaBlock
 
-  def getBlock(id: String): Future[Option[Block[String, Array[Byte], Array[Byte]]]]
-  def getPartition(id: String): Future[Option[Partition]]
-  def getMeta(id: String): Future[Option[MetaBlock]]
+  def getBlock(id: Array[Byte]): Future[Option[Block]]
+  def getPartition(id: Array[Byte]): Future[Option[Partition]]
+  def getMeta(id: Array[Byte]): Future[Option[MetaBlock]]
 
   def copy(meta: MetaBlock): MetaBlock
   def copy(p: Partition): Partition

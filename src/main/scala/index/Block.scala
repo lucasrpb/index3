@@ -1,13 +1,13 @@
 package index
 
-trait Block[T, K, V] {
+trait Block {
 
-  val id: T
+  val id: Array[Byte]
 
   def isFull(): Boolean
   def isEmpty(): Boolean
   def hasMinimumSize(): Boolean
   def hasEnoughSize(): Boolean
-  def max: Option[K]
+  def max: Option[Array[Byte]]
 
 }

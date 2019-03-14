@@ -19,78 +19,19 @@ class SerializationSpec extends FlatSpec {
     override def compare(x: Array[Byte], y: Array[Byte]): Int = comparator.compare(x, y)
   }
 
-  object BlockSerializer extends Serializer [DataBlock]{
-
-    val SIZE = 2048
-
-    val DATA_MAX = SIZE
-    val DATA_MIN = DATA_MAX/3
-    val DATA_LIMIT = 2 * DATA_MIN
-
-    val HEADER_SIZE = 8
-
-    override def serialize(b: DataBlock): ByteBuffer = {
-      val meta_size = b.length * 8
-      val buf = ByteBuffer.allocateDirect(HEADER_SIZE + meta_size + b.size)
-
-      // Header
-      buf.putInt(b.length)
-
-      // keys size
-      buf.putInt(b.size)
-
-      for(i<-0 until b.length){
-        val (k, v) = b.keys(i)
-        val klen = k.length
-        val vlen = v.length
-
-        //key size
-        buf.putInt(k.length).putInt(vlen)
-
-        //Content
-        buf.put(k)
-        buf.put(v)
-      }
-
-      buf.flip()
-    }
-
-    override def deserialize(buf: ByteBuffer): Option[DataBlock] = {
-      val b = new DataBlock(UUID.randomUUID.toString, DATA_MIN, DATA_MAX, DATA_LIMIT)
-
-      b.length = buf.getInt()
-      b.size = buf.getInt()
-
-      b.keys = Array.ofDim[Pair](b.length)
-
-      for(i<-0 until b.length){
-        val klen = buf.getInt()
-        val vlen = buf.getInt()
-
-        val k = Array.ofDim[Byte](klen)
-
-        buf.get(k)
-
-        val v = Array.ofDim[Byte](vlen)
-
-        buf.get(v)
-
-        b.keys(i) = k -> v
-      }
-
-      Some(b)
-    }
-  }
-
   val MAX_VALUE = Int.MaxValue
 
   def test(): Unit = {
 
+    object DataBlockSerializer extends DataBlockSerializer(2048)
+    object MetaBlockSerializer extends MetaBlockSerializer(2048)
+
     val rand = ThreadLocalRandom.current()
 
-    import BlockSerializer._
+    import DataBlockSerializer.{MIN => DATA_MIN, MAX => DATA_MAX, LIMIT => DATA_LIMIT}
+    import MetaBlockSerializer.{MIN => META_MIN, MAX => META_MAX, LIMIT => META_LIMIT}
 
-    val b1 = new DataBlock(UUID.randomUUID.toString, DATA_MIN, DATA_MAX, DATA_LIMIT)
+    val b1 = new DataBlock(UUID.randomUUID.toString.getBytes(), DATA_MIN, DATA_MAX, DATA_LIMIT)
 
     var list = Seq.empty[Pair]
 
@@ -107,9 +48,9 @@ class SerializationSpec extends FlatSpec {
     println(b1.insert(list))
     println(b1.length, b1.size)
 
-    val buf = BlockSerializer.serialize(b1)
+    val buf = DataBlockSerializer.serialize(b1)
 
-    val b2 = BlockSerializer.deserialize(buf).get
+    val b2 = DataBlockSerializer.deserialize(buf).get
 
     val b1s = b1.inOrder().map{case (k, v) => new String(k)}
     val b2s = b2.inOrder().map{case (k, v) => new String(k)}

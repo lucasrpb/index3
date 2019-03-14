@@ -12,6 +12,6 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % "3.0.5",
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
-  "com.google.guava" % "guava" % "27.0.1-jre"
+  "com.google.guava" % "guava" % "27.0.1-jre",
+  "com.datastax.cassandra" % "cassandra-driver-core" % "3.7.0"
 )
-

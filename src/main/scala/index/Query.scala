@@ -5,7 +5,7 @@ import scala.concurrent.duration._
 
 object Query {
 
-  def inOrder[T](start: Option[String])(implicit ec: ExecutionContext, store: Storage): Seq[Pair] = {
+  def inOrder[T](start: Option[Array[Byte]])(implicit ec: ExecutionContext, store: Storage): Seq[Pair] = {
     start match {
       case None => Seq.empty[Pair]
       case Some(id) =>

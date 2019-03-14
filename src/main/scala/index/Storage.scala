@@ -5,8 +5,8 @@ import scala.concurrent.Future
 
 trait Storage {
 
-  def get(id: String): Future[Option[Block[String, Array[Byte], Array[Byte]]]]
-  def put(block: Block[String, Array[Byte], Array[Byte]]): Future[Boolean]
-  def save(blocks: TrieMap[String, Block[String, Array[Byte], Array[Byte]]]): Future[Boolean]
+  def get(id: Array[Byte]): Future[Option[Block]]
+  def put(block: Block): Future[Boolean]
+  def save(blocks: TrieMap[Array[Byte], Block]): Future[Boolean]
 
 }

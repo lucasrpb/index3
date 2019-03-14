@@ -4,17 +4,14 @@ import java.util.UUID
 
 import scala.reflect.ClassTag
 
-class MetaBlock(val id: String,
+class MetaBlock(val id: Array[Byte],
                 val MIN: Int,
                 val MAX: Int,
-                val LIMIT: Int)(implicit ord: Ordering[Array[Byte]])
-  extends Block[String, Array[Byte], Array[Byte]]{
+                val LIMIT: Int)(implicit ord: Ordering[Array[Byte]]) extends Block {
 
   var length = 0
   var size = 0
   var pointers = Array.empty[Pointer]
-
-  //def size() = if(length == 0) 0 else pointers.slice(0, length).map(x => x._1.length + x._2.length).sum
 
   def find(k: Array[Byte], start: Int, end: Int): (Boolean, Int) = {
     if(start > end) return false -> start
@@ -28,14 +25,14 @@ class MetaBlock(val id: String,
     find(k, pos + 1, end)
   }
 
-  def findPath(k: Array[Byte]): Option[String] = {
+  def findPath(k: Array[Byte]): Option[Array[Byte]] = {
     if(length == 0) return None
     val (_, pos) = find(k, 0, length - 1)
 
     Some(pointers(if(pos < length) pos else pos - 1)._2)
   }
 
-  def setChild(k: Array[Byte], child: String, pos: Int)(implicit ctx: TxContext): Boolean = {
+  def setChild(k: Array[Byte], child: Array[Byte], pos: Int)(implicit ctx: TxContext): Boolean = {
     pointers(pos) = k -> child
 
     ctx.parents += child -> (Some(this.id), pos)
@@ -43,19 +40,19 @@ class MetaBlock(val id: String,
     true
   }
 
-  def left(pos: Int): Option[String] = {
+  def left(pos: Int): Option[Array[Byte]] = {
     val lpos = pos - 1
     if(lpos < 0) return None
     Some(pointers(lpos)._2)
   }
 
-  def right(pos: Int): Option[String] = {
+  def right(pos: Int): Option[Array[Byte]] = {
     val rpos = pos + 1
     if(rpos >= length) return None
     Some(pointers(rpos)._2)
   }
 
-  def insertAt(k: Array[Byte], child: String, idx: Int)(implicit ctx: TxContext): (Boolean, Int) = {
+  def insertAt(k: Array[Byte], child: Array[Byte], idx: Int)(implicit ctx: TxContext): (Boolean, Int) = {
     for(i<-length until idx by -1){
       val (k, child) = pointers(i - 1)
       setChild(k, child, i)
@@ -69,7 +66,7 @@ class MetaBlock(val id: String,
     true -> idx
   }
 
-  def insert(k: Array[Byte], child: String)(implicit ctx: TxContext): (Boolean, Int) = {
+  def insert(k: Array[Byte], child: Array[Byte])(implicit ctx: TxContext): (Boolean, Int) = {
     if(size + (k.length + child.length) > MAX) {
       return false -> 0
     }

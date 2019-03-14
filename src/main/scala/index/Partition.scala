@@ -1,13 +1,11 @@
 package index
 
-trait Partition extends Block[String, Array[Byte], Array[Byte]]{
+trait Partition extends Block {
 
   def insert(data: Seq[Pair]): (Boolean, Int)
   def remove(keys: Seq[Array[Byte]]): (Boolean, Int)
   def update(data: Seq[Pair]): (Boolean, Int)
   def inOrder(): Seq[Pair]
-  //def copy(): Partition[T]
-  //def split(): Partition[T]
 
   /*def canBorrowTo(t: Partition[T]): Boolean
   def borrowRightTo(t: Partition[T]): Partition[T]

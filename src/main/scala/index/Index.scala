@@ -16,7 +16,7 @@ class Index[T: ClassTag](val iref: IndexRef,
 
   def ref: IndexRef = IndexRef(id, root, size)
 
-  def fixRoot(p: Block[String, Array[Byte], Array[Byte]]): Boolean = {
+  def fixRoot(p: Block): Boolean = {
     p match {
       case p: MetaBlock =>
 
@@ -34,7 +34,7 @@ class Index[T: ClassTag](val iref: IndexRef,
     }
   }
 
-  def recursiveCopy(p: Block[String, Array[Byte], Array[Byte]]): Future[Boolean] = {
+  def recursiveCopy(p: Block): Future[Boolean] = {
     val (parent, pos) = ctx.parents(p.id)
 
     parent match {
@@ -52,7 +52,7 @@ class Index[T: ClassTag](val iref: IndexRef,
     }
   }
 
-  def find(k: Array[Byte], start: Option[String]): Future[(Boolean, Option[Partition])] = {
+  def find(k: Array[Byte], start: Option[Array[Byte]]): Future[(Boolean, Option[Partition])] = {
     start match {
       case None => Future.successful(false -> None)
       case Some(id) => ctx.getBlock(id).flatMap { opt =>
@@ -99,7 +99,7 @@ class Index[T: ClassTag](val iref: IndexRef,
     recursiveCopy(p).map(_ -> n)
   }
 
-  def insertParent(left: MetaBlock, prev: Block[String, Array[Byte], Array[Byte]]): Future[Boolean] = {
+  def insertParent(left: MetaBlock, prev: Block): Future[Boolean] = {
 
     if(left.isFull()){
 
@@ -125,8 +125,7 @@ class Index[T: ClassTag](val iref: IndexRef,
     recursiveCopy(left)
   }
 
-  def handleParent(left: Block[String, Array[Byte], Array[Byte]],
-                   right: Block[String, Array[Byte], Array[Byte]]): Future[Boolean] = {
+  def handleParent(left: Block, right: Block): Future[Boolean] = {
     val (parent, pos) = ctx.parents(left.id)
 
     parent match {

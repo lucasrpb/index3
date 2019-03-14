@@ -91,7 +91,7 @@ class MainSpec extends FlatSpec {
 
   "index data " should "be equal to test data" in {
 
-    val n = 100
+    val n = 1
 
     for(i<-0 until n){
       test()
